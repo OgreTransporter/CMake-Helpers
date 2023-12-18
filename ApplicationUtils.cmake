@@ -1,7 +1,7 @@
 # ================================================================================================ #
 #  APPLICATION_BASICS( TARGET <target> [ICON <icon>] [COMPANY <company>] [COPYRIGHT <copyright>]   #
 #                      [DESCRIPTION <description>] [VSPATH <path directories> ...]                 #
-#                      [GUID <gui identifer>]                                                      #
+#                      [GUID <gui identifer>] [GUI]                                                #
 #                    )                                                                             #
 #                                                                                                  #
 # This function sets some standard properties for a target and creates a resource file under       #
@@ -17,6 +17,7 @@
 # <path directories> - Any number of directories to add to the VS Debugger's PATH environment
 #                      variable.
 # <gui identifer>    - Mac OSX gui identifer string
+# GUI                - Force executable is a GUI application
 
 if(__application_basics)
     return()
@@ -26,7 +27,7 @@ set(__application_basics YES)
 include(Win32Resource)
 
 macro(application_basics)
-    set(options)
+    set(options GUI)
     set(oneValueArgs TARGET ICON COMPANY DESCRIPTION COPYRIGHT GUID)
     set(multiValueArgs VSPATH)
     cmake_parse_arguments(APP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -36,8 +37,13 @@ macro(application_basics)
     if(NOT APP_GUID)
         set(APP_GUID "${APP_TARGET}.application.org")
     endif()
+    if(NOT APP_GUI)
+        set(APP_GUI OFF)
+	else()
+        set(APP_GUI ON)
+    endif()
     get_target_property(_type ${APP_TARGET} TYPE)
-    if (${_type} STREQUAL "EXECUTABLE")
+    if (${_type} STREQUAL "EXECUTABLE" AND ${APP_GUI})
         set_target_properties(${APP_TARGET} PROPERTIES
             MACOSX_BUNDLE_GUI_IDENTIFIER ${APP_GUID}
             MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
